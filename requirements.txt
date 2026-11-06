@@ -1,0 +1,8 @@
+streamlit>=1.40
+# Misma versión con la que se generó modelo_segmentacion.pkl (un .pkl de scikit-learn solo es
+# compatible con la versión que lo creó). Si cambia esta versión, la app reentrena al iniciar.
+scikit-learn==1.9.1
+pandas>=2.2
+numpy>=2.0
+joblib>=1.3
+altair>=5.0

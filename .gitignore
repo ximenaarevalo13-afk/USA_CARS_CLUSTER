@@ -1,0 +1,29 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# --- Entornos virtuales ---
+.venv/
+venv/
+env/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Streamlit: credenciales (nunca subirlas a GitHub) ---
+.streamlit/secrets.toml
+
+# --- Resultados generados al usar la app ---
+lote_segmentado.csv
+lote_ejemplo.csv
+
+# --- Sistema operativo / editores ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# IMPORTANTE: modelo_segmentacion.pkl y data/USA_cars_datasets.csv SÍ deben subirse:
+# la app los necesita en Streamlit Cloud.
