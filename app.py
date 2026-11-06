@@ -17,7 +17,9 @@ from segmentador import (ANIO_REF, COLUMNAS_MINIMAS, ORDEN_SEG, REVISION, SALVAG
 
 BASE = Path(__file__).parent
 RUTA_MODELO = BASE / "modelo_segmentacion.pkl"
-RUTA_DATOS = BASE / "data" / "USA_cars_datasets.csv"
+# El CSV puede estar en data/ (estructura recomendada) o suelto en la raíz del repositorio
+RUTA_DATOS = next((r for r in [BASE / "data" / "USA_cars_datasets.csv", BASE / "USA_cars_datasets.csv"] if r.exists()),
+                  BASE / "data" / "USA_cars_datasets.csv")
 
 st.set_page_config(page_title="Segmentación de inventario · US AutoMarket", page_icon="🚗", layout="wide")
 
@@ -49,6 +51,11 @@ def cargar_modelo():
         motivo = f"el .pkl se creó con scikit-learn {modelo.get('sklearn_version')} y el servidor usa {sklearn.__version__}"
     except Exception as e:  # archivo ausente o incompatible
         motivo = f"no se pudo leer el .pkl ({type(e).__name__})"
+    if not RUTA_DATOS.exists():
+        st.error(f"No se puede cargar el modelo: {motivo}, y no está el archivo data/USA_cars_datasets.csv para "
+                 "reentrenarlo. Verifique que se instale la versión de scikit-learn de requirements.txt "
+                 "o suba el CSV a la carpeta data/.")
+        st.stop()
     df = pd.read_csv(RUTA_DATOS)
     df = df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")])
     return entrenar(df), f"Reentrenado al iniciar: {motivo}"
@@ -198,10 +205,11 @@ with tab_lote:
     st.subheader("Asignar un lote de vehículos")
     st.markdown(f"El archivo CSV debe tener al menos las columnas: `{'`, `'.join(COLUMNAS_MINIMAS)}`. "
                 "Si incluye `vin`, los VIN repetidos se envían a revisión. Las demás columnas se conservan.")
-    ejemplo = pd.read_csv(RUTA_DATOS)
-    ejemplo = ejemplo.drop(columns=[c for c in ejemplo.columns if c.startswith("Unnamed")]).sample(30, random_state=7)
-    st.download_button("Descargar CSV de ejemplo (30 vehículos)", ejemplo.to_csv(index=False).encode("utf-8"),
-                       "lote_ejemplo.csv", "text/csv")
+    if RUTA_DATOS.exists():   # el CSV de ejemplo solo se ofrece si el repositorio incluye los datos
+        ejemplo = pd.read_csv(RUTA_DATOS)
+        ejemplo = ejemplo.drop(columns=[c for c in ejemplo.columns if c.startswith("Unnamed")]).sample(30, random_state=7)
+        st.download_button("Descargar CSV de ejemplo (30 vehículos)", ejemplo.to_csv(index=False).encode("utf-8"),
+                           "lote_ejemplo.csv", "text/csv")
 
     archivo = st.file_uploader("Cargar CSV", type=["csv"])
     if archivo is not None:
